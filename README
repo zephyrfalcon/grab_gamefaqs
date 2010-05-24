@@ -1,0 +1,35 @@
+'  grab_gamefaqs                      .H`
+                               .s**""**`
+,            .o^%;     ,b*^;;,=^
+ "a, .f*^z~_oP   '8.  .8
+   '^*     `       `*^'
+
+
+.
+A simple, quick & dirty script, written in old-school Python, to grab the FAQs
+of a particular game off of GameFAQs.
+.
+
+
+REQUIREMENTS:
+
+- Python 2.6, but older versions of Python will probably work as well. (The
+  current version of the script will NOT work with Python 3.x.)
+
+
+HOW TO USE:
+
+
+.(1).  Go to the FAQs page for a particular game, and copy the URL.
+
+For example: [http://www.gamefaqs.com/pc/564920-loom/faqs]
+
+
+.(2).  Feed this URL to grab_gamefaqs.py, and specify an output directory:
+
+  $ python grab_gamefaqs.py http://www.gamefaqs.com/pc/564920-loom/faqs loom
+
+
+.(3).  That's it! All the FAQs found on the given page should now be written to
+       the output directory, retaining their original names.
+
