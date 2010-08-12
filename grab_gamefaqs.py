@@ -1,8 +1,5 @@
 # grab_gamefaqs.py
 
-# TODO:
-# - does not grab images yet
-
 import cStringIO
 import os
 import re
@@ -48,11 +45,18 @@ class PreFinder(sgmllib.SGMLParser):
     def __init__(self, *args, **kwargs):
         sgmllib.SGMLParser.__init__(self, *args, **kwargs)
         self._pre = False
+        self._image = None
         self.raw_text = []
     def start_pre(self, attributes):
         self._pre = True
     def end_pre(self):
         self._pre = False
+    def start_img(self, attributes):
+        if self._pre and not self._image:
+            attrs = dict(attributes)
+            img_url = attrs.get('src', None)
+            if img_url:
+                self._image = img_url
     def handle_data(self, data):
         if self._pre:
             self.raw_text.append(data)
@@ -79,6 +83,12 @@ def grab_faq(url):
     data = grab_url(url)
     parser = PreFinder()
     parser.feed(data)
+    
+    if parser._image:
+        image_data = grab_url(parser._image)
+        shortname = os.path.split(parser._image)[1]
+        return image_data, shortname
+    
     m = re_real_name.search(data)
     if m:
         real_name = m.group(1)
