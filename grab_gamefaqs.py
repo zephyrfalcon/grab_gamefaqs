@@ -9,6 +9,8 @@ import sys
 import time
 import urllib
 
+__version__ = "1.0"
+
 __usage__ = """\
 grab_gamefaqs.py faq_page_url [output_dir]
 """
