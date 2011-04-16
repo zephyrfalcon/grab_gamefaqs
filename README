@@ -10,6 +10,18 @@ A simple, quick & dirty script, written in old-school Python, to grab the FAQs
 of a particular game off of GameFAQs.
 .
 
+--->
+NOTE [2011-04-16]: Apparently there is now a new FAQ format, using HTML for
+formatting (as opposed to the old FAQs, which always were plain text). This
+script does not support the new format yet.
+
+Example:
+formatted with pagination:
+http://www.gamefaqs.com/ds/989552-pokemon-black-version/faqs/62028
+fixed-width printable (still has some formatting):
+http://www.gamefaqs.com/ds/989552-pokemon-black-version/faqs/62028?print=2
+<---
+
 
 REQUIREMENTS:
 
