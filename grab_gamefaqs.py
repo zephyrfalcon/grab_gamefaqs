@@ -1,6 +1,7 @@
 # grab_gamefaqs.py
 
 import cStringIO
+import getopt
 import os
 import re
 import sgmllib
@@ -9,15 +10,19 @@ import sys
 import time
 import urllib
 
-__version__ = "1.0"
+__version__ = "1.1"
 
 __usage__ = """\
-grab_gamefaqs.py faq_page_url [output_dir]
+grab_gamefaqs.py [options] faq_page_url [output_dir]
+
+Options:
+    -n N    Download at most N files. (mostly for testing)
 """
 
 BASE_URL = "http://www.gamefaqs.com"
 re_url = re.compile("/faqs/\d+$")
 re_real_name = re.compile("%2F([^%]*?)\">View/Download Original")
+re_url_info = re.compile(r"www\.gamefaqs\.com/\w+/(\S+?)/faqs/(\d+)")
 
 def grab_url(url, max_size=None):
     print 'Reading', url, '...',
@@ -94,11 +99,20 @@ def grab_faq(url):
     m = re_real_name.search(data)
     if m:
         real_name = m.group(1)
+        raw_text = string.join(parser.raw_text, "")
     else:
-        real_name = "faq_%s" % time.time() # use a dummy name
-    raw_text = string.join(parser.raw_text, "")
+        # assume this in HTML format... grab the URL again
+        new_url = url + "?print=2"
+        raw_text = grab_url(new_url) # we don't remove any HTML 
+        #real_name = "faq_%s.html" % time.time() # FIXME use a dummy name
+        real_name = make_up_filename(url)
     
     return raw_text, real_name
+
+def make_up_filename(url, ext="html"):
+    m = re_url_info.search(url)
+    if m:
+        return "%s-%s.%s" % (m.group(1), m.group(2), ext)
     
 def write_faq(out_dir, filename, data):
     print "Writing:", filename, "...",
@@ -108,7 +122,7 @@ def write_faq(out_dir, filename, data):
     f.close()
     print "OK (%dK)" % (len(data) / 1024)
 
-def grab_gamefaqs(url, out_dir):
+def grab_gamefaqs(url, out_dir, max_urls):
     try:
         os.makedirs(out_dir)
     except:
@@ -118,17 +132,29 @@ def grab_gamefaqs(url, out_dir):
     print len(data), "bytes read"
     urls = scan_index_page(data)
     print len(urls), "URLs found"
+    if max_urls > -1: urls = urls[:max_urls]
     for url in urls:
         data, filename = grab_faq(url)
         write_faq(out_dir, filename, data)
 
 if __name__ == "__main__":
+
+    max_urls = -1
+    opts, args = getopt.getopt(sys.argv[1:], "n:")
+
+    if not args:
+        print __usage__
+        sys.exit(1)
+
+    for o, a in opts:
+        if o == "-n":
+            max_urls = int(a)
     
-    url = sys.argv[1]
-    if sys.argv[2:]:
-        out_dir = sys.argv[2]
+    url = args[0]
+    if args[1:]:
+        out_dir = args[1]
     else:
         out_dir = "gamefaqs"
         
-    grab_gamefaqs(url, out_dir)
+    grab_gamefaqs(url, out_dir, max_urls)
     
