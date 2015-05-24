@@ -1,9 +1,4 @@
-'  grab_gamefaqs                      .H`
-                               .s**""**`
-,            .o^%;     ,b*^;;,=^
- "a, .f*^z~_oP   '8.  .8
-   '^*     `       `*^'
-
+# grab_gamefaqs                     
 
 .
 A simple, quick & dirty script, written in old-school Python, to grab the FAQs
@@ -11,10 +6,9 @@ of a particular game off of GameFAQs.
 .
 
 
-
 REQUIREMENTS:
 
-- Python 2.6, but older versions of Python will probably work as well. (The
+- Python 2.7, but older versions of Python will probably work as well. (The
   current version of the script will NOT work with Python 3.x.)
 
 
@@ -33,4 +27,19 @@ For example: [http://www.gamefaqs.com/pc/564920-loom/faqs]
 
 .(3).  That's it! All the FAQs found on the given page should now be written to
        the output directory, retaining their original names.
+
+
+Note that some FAQs are *BIG*, and may require a minute or two to download,
+especially on slower connections.
+
+Also: kindly do not abuse this script. It is meant as a handy program to
+quickly get all of a game's FAQs at once, not as a tool to scrape the whole
+GameFAQs site.
+
+
+UPDATE (version 1.2, 2015-05-24):
+
+It seems this script no longer worked properly. I fixed the detection and
+extraction of plain text files and images, and added support for custom
+user-agents.
 
