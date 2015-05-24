@@ -8,7 +8,7 @@ import sgmllib
 import string
 import sys
 import time
-import urllib
+import urllib2
 
 __version__ = "1.1"
 
@@ -26,13 +26,19 @@ re_url_info = re.compile(r"www\.gamefaqs\.com/\w+/(\S+?)/faqs/(\d+)")
 
 def grab_url(url, max_size=None):
     print 'Reading', url, '...',
-    u = urllib.urlopen(url)
+    try:
+        u = urllib2.urlopen(url)
+    except urllib2.HTTPError as e:
+        print "HTTP error:", e.code, e.reason
+        print e.read()
+        sys.exit(1)
     if max_size is None:
         data = u.read()
     else:
         data = u.read(max_size)
     u.close()
     print 'OK'
+    print data
     return data
 
 class URLFinder(sgmllib.SGMLParser):
