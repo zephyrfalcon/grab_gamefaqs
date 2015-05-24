@@ -2,6 +2,7 @@
 
 import cStringIO
 import getopt
+import HTMLParser
 import os
 import re
 import sgmllib
@@ -25,7 +26,9 @@ USER_AGENT = "Mozilla/5.0"
 
 BASE_URL = "http://www.gamefaqs.com"
 re_url = re.compile("/faqs/\d+$")
-re_real_name = re.compile("%2F([^%]*?)\">View/Download Original")
+#re_real_name = re.compile("%2F([^%]*?)\">View/Download Original")
+re_real_name = re.compile("destURL=(.*?)\"><b>Printable Version")
+re_image = re.compile("Click/tap image to expand.*?destURL=(.*?)\"")
 re_url_info = re.compile(r"www\.gamefaqs\.com/\w+/(\S+?)/faqs/(\d+)")
 
 def grab_url(url, max_size=None):
@@ -86,9 +89,8 @@ def grab_index_page(url):
     else:
         print 'Reading local file...',
         # assume it's a local file
-        f = open(url, 'rb')
-        data = f.read()
-        f.close()
+        with open(url, 'rb') as f:
+            data = f.read()
         print 'OK'
         return data
     
@@ -103,6 +105,7 @@ def grab_faq(url):
     parser = PreFinder()
     parser.feed(data)
     
+    # XXX obsolete
     if parser._image:
         image_data = grab_url(parser._image)
         shortname = os.path.split(parser._image)[1]
@@ -110,14 +113,31 @@ def grab_faq(url):
     
     m = re_real_name.search(data)
     if m:
-        real_name = m.group(1)
-        raw_text = string.join(parser.raw_text, "")
-    else:
-        # assume this in HTML format... grab the URL again
-        new_url = url + "?print=2"
-        raw_text = grab_url(new_url) # we don't remove any HTML 
-        #real_name = "faq_%s.html" % time.time() # FIXME use a dummy name
-        real_name = make_up_filename(url)
+        quoted_full_name = m.group(1)
+        #print ">>1", quoted_full_name
+        full_name = urllib2.unquote(quoted_full_name) 
+        #print ">>2", full_name
+        #raw_text = string.join(parser.raw_text, "")
+        raw_text = grab_url(full_name)
+        real_name = os.path.basename(full_name)
+        return raw_text, real_name
+
+    m = re_image.search(data)
+    if m:
+        quoted_full_name = m.group(1)
+        #print ">>1", quoted_full_name
+        full_name = urllib2.unquote(quoted_full_name) 
+        #print ">>2", full_name
+        #raw_text = string.join(parser.raw_text, "")
+        raw_text = grab_url(full_name)
+        real_name = os.path.basename(full_name)
+        return raw_text, real_name
+
+    # assume this in HTML format... grab the URL again
+    new_url = url + "?print=2"
+    raw_text = grab_url(new_url) # we don't remove any HTML 
+    #real_name = "faq_%s.html" % time.time() # FIXME use a dummy name
+    real_name = make_up_filename(url)
     
     return raw_text, real_name
 
@@ -129,9 +149,8 @@ def make_up_filename(url, ext="html"):
 def write_faq(out_dir, filename, data):
     print "Writing:", filename, "...",
     path = os.path.join(out_dir, filename)
-    f = open(path, 'wb')
-    f.write(data)
-    f.close()
+    with open(path, 'wb') as f:
+        f.write(data)
     print "OK (%dK)" % (len(data) / 1024)
 
 def grab_gamefaqs(url, out_dir, max_urls):
