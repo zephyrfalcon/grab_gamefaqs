@@ -10,14 +10,18 @@ import sys
 import time
 import urllib2
 
-__version__ = "1.1"
+__version__ = "1.2"
 
 __usage__ = """\
 grab_gamefaqs.py [options] faq_page_url [output_dir]
 
 Options:
     -n N    Download at most N files. (mostly for testing)
+    -u U    Use User-Agent: U.
 """
+
+USER_AGENT = "Mozilla/5.0" 
+# replace this with a custom user agent if gamefaqs starts complaining
 
 BASE_URL = "http://www.gamefaqs.com"
 re_url = re.compile("/faqs/\d+$")
@@ -26,11 +30,14 @@ re_url_info = re.compile(r"www\.gamefaqs\.com/\w+/(\S+?)/faqs/(\d+)")
 
 def grab_url(url, max_size=None):
     print 'Reading', url, '...',
+    req = urllib2.Request(url)
+    req.add_header('User-Agent', USER_AGENT)
     try:
-        u = urllib2.urlopen(url)
+        u = urllib2.urlopen(req)
     except urllib2.HTTPError as e:
         print "HTTP error:", e.code, e.reason
         print e.read()
+        print e.info()
         sys.exit(1)
     if max_size is None:
         data = u.read()
@@ -38,7 +45,6 @@ def grab_url(url, max_size=None):
         data = u.read(max_size)
     u.close()
     print 'OK'
-    print data
     return data
 
 class URLFinder(sgmllib.SGMLParser):
@@ -146,7 +152,7 @@ def grab_gamefaqs(url, out_dir, max_urls):
 if __name__ == "__main__":
 
     max_urls = -1
-    opts, args = getopt.getopt(sys.argv[1:], "n:")
+    opts, args = getopt.getopt(sys.argv[1:], "n:u:")
 
     if not args:
         print __usage__
@@ -155,6 +161,8 @@ if __name__ == "__main__":
     for o, a in opts:
         if o == "-n":
             max_urls = int(a)
+        elif o == "-u":
+            USER_AGENT = a
     
     url = args[0]
     if args[1:]:
