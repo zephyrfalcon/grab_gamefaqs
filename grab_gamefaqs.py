@@ -2,7 +2,6 @@
 
 import cStringIO
 import getopt
-import HTMLParser
 import os
 import re
 import sgmllib
@@ -19,6 +18,7 @@ grab_gamefaqs.py [options] faq_page_url [output_dir]
 Options:
     -n N    Download at most N files. (mostly for testing)
     -u U    Use User-Agent: U.
+    -d      Debug: output actual HTML returned.
 """
 
 USER_AGENT = "Mozilla/5.0" 
@@ -62,6 +62,7 @@ class URLFinder(sgmllib.SGMLParser):
             #print 'URL found:', url
             self.urls.append(url)
             
+# XXX obsolete?
 class PreFinder(sgmllib.SGMLParser):
     # XXX may need to convert entities...
     def __init__(self, *args, **kwargs):
@@ -153,7 +154,7 @@ def write_faq(out_dir, filename, data):
         f.write(data)
     print "OK (%dK)" % (len(data) / 1024)
 
-def grab_gamefaqs(url, out_dir, max_urls):
+def grab_gamefaqs(url, out_dir, max_urls, debug=False):
     try:
         os.makedirs(out_dir)
     except:
@@ -161,6 +162,7 @@ def grab_gamefaqs(url, out_dir, max_urls):
         
     data = grab_index_page(url)
     print len(data), "bytes read"
+    if debug: print data
     urls = scan_index_page(data)
     print len(urls), "URLs found"
     if max_urls > -1: urls = urls[:max_urls]
@@ -171,14 +173,17 @@ def grab_gamefaqs(url, out_dir, max_urls):
 if __name__ == "__main__":
 
     max_urls = -1
-    opts, args = getopt.getopt(sys.argv[1:], "n:u:")
+    debug = False
+    opts, args = getopt.getopt(sys.argv[1:], "dn:u:")
 
     if not args:
         print __usage__
         sys.exit(1)
 
     for o, a in opts:
-        if o == "-n":
+        if o == "-d":
+            debug = True
+        elif o == "-n":
             max_urls = int(a)
         elif o == "-u":
             USER_AGENT = a
@@ -189,5 +194,5 @@ if __name__ == "__main__":
     else:
         out_dir = "gamefaqs"
         
-    grab_gamefaqs(url, out_dir, max_urls)
+    grab_gamefaqs(url, out_dir, max_urls, debug)
     
