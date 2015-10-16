@@ -10,7 +10,7 @@ import sys
 import time
 import urllib2
 
-__version__ = "1.2"
+__version__ = "1.2.1"
 
 __usage__ = """\
 grab_gamefaqs.py [options] faq_page_url [output_dir]
@@ -28,7 +28,8 @@ BASE_URL = "http://www.gamefaqs.com"
 re_url = re.compile("/faqs/\d+$")
 #re_real_name = re.compile("%2F([^%]*?)\">View/Download Original")
 re_real_name = re.compile("destURL=(.*?)\"><b>Printable Version")
-re_image = re.compile("Click/tap image to expand.*?destURL=(.*?)\"")
+re_image = re.compile("Click/tap image to expand.*?<img.*?src=\"(.*?)\"", 
+           re.DOTALL)
 re_url_info = re.compile(r"www\.gamefaqs\.com/\w+/(\S+?)/faqs/(\d+)")
 
 def grab_url(url, max_size=None):
@@ -124,11 +125,11 @@ def grab_faq(url):
         return raw_text, real_name
 
     m = re_image.search(data)
-    if m:
+    if m is not None:
         quoted_full_name = m.group(1)
-        #print ">>1", quoted_full_name
+        if debug: print ">>1", quoted_full_name
         full_name = urllib2.unquote(quoted_full_name) 
-        #print ">>2", full_name
+        if debug: print ">>2", full_name
         #raw_text = string.join(parser.raw_text, "")
         raw_text = grab_url(full_name)
         real_name = os.path.basename(full_name)
