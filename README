@@ -46,13 +46,16 @@ user-agents.
 UPDATE (version 1.2.1, 2015-10-15):
 
 Added -d switch which displays some debugging info.
-Apparently GameFAQs changed their format again; files that used to be accessible as 
-plain text (ASCII) are now rendered as HTML pretending to be ASCII. The original 
-filename seems to be gone. As a result, these files are now downloaded as HTML 
-files with a meaningless name. :-/
-The same happened to images, but I fixed this (since the original image name is
-still available... for now anyway).
 
-I am thinking of abandoning this script and writing one for NeoSeeker instead. :-/
+Apparently GameFAQs changed their format again; files that used to be
+accessible as plain text (ASCII) are now rendered as HTML pretending to be
+ASCII. The original filename seems to be gone. As a result, these files are
+now downloaded as HTML files with a meaningless name. :-/
+
+The same happened to images, but I fixed this (since the original image name
+is still available... for now anyway).
+
+I am thinking of abandoning this script and writing one for NeoSeeker instead.
+:-/
 
 
